@@ -20,13 +20,13 @@ services:
       - FLINK_HOME=/opt/flink
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
-      - ./hadoop:/opt/hadoop
-      - ./spark:/opt/spark
-      - ./hive:/opt/hive
+      - ./hadoop/etc:/opt/hadoop/etc
+      - ./spark/conf:/opt/spark/conf
+      - ./hive/conf:/opt/hive/conf
       - ./flink:/opt/flink
     networks:
       - hadoop_net
-    command: ["/opt/install.sh"]
+    # command: ["/opt/install.sh"]
 
   worker1:
     build:
@@ -39,7 +39,7 @@ services:
       - HIVE_HOME=/opt/hive
     volumes:
       - hadoop_datanode1:/hadoop/dfs/data
-      - ./hadoop:/opt/hadoop
+      - ./hadoop/etc:/opt/hadoop/etc
       - ./hive:/opt/hive
     networks:
       - hadoop_net
@@ -58,8 +58,8 @@ services:
       - HBASE_HOME=/opt/hbase
     volumes:
       - hadoop_datanode2:/hadoop/dfs/data
-      - ./hadoop:/opt/hadoop
-      - ./hbase:/opt/hbase
+      - ./hadoop/etc:/opt/hadoop/etc
+      - ./hbase/conf:/opt/hbase/conf
     networks:
       - hadoop_net
     depends_on:
@@ -78,8 +78,8 @@ services:
       - FLINK_HOME=/opt/flink
     volumes:
       - hadoop_datanode3:/hadoop/dfs/data
-      - ./hadoop:/opt/hadoop
-      - ./spark:/opt/spark
+      - ./hadoop/etc:/opt/hadoop/etc
+      - ./spark/conf:/opt/spark/conf
       - ./flink:/opt/flink
     networks:
       - hadoop_net
@@ -98,7 +98,7 @@ services:
       - PRESTO_HOME=/opt/presto
     volumes:
       - hadoop_datanode4:/hadoop/dfs/data
-      - ./hadoop:/opt/hadoop
+      - ./hadoop/etc:/opt/hadoop/etc
       - ./presto:/opt/presto
     networks:
       - hadoop_net

@@ -1,7 +1,6 @@
 packages/
 
-flink/
-hadoop/
-hive/
-spark/
-presto/
+*.tar.gz
+*.tgz
+*.tar.bz2
+*.zip

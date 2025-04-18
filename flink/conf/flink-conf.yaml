@@ -1,0 +1,37 @@
+################################################################################
+# Flink Configuration
+################################################################################
+
+# JobManager configuration
+jobmanager.rpc.address: master
+jobmanager.rpc.port: 6123
+jobmanager.memory.process.size: 1600m
+
+# TaskManager configuration
+taskmanager.memory.process.size: 1728m
+taskmanager.numberOfTaskSlots: 2
+
+# Web UI
+rest.port: 8081
+rest.address: 0.0.0.0
+
+# Parallelism and checkpointing
+parallelism.default: 2
+execution.checkpointing.interval: 10000
+execution.checkpointing.mode: EXACTLY_ONCE
+
+# High availability settings
+high-availability: zookeeper
+high-availability.zookeeper.quorum: master:2181
+high-availability.zookeeper.path.root: /flink
+high-availability.cluster-id: /cluster_one
+high-availability.storageDir: hdfs:///flink/ha/
+
+# State backend settings
+state.backend: filesystem
+state.checkpoints.dir: hdfs:///flink/checkpoints/
+state.savepoints.dir: hdfs:///flink/savepoints/
+
+# Metrics
+metrics.reporter.prometheus.class: org.apache.flink.metrics.prometheus.PrometheusReporter
+metrics.reporter.prometheus.port: 9249
