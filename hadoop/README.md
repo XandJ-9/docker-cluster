@@ -1,33 +1,52 @@
-# 单独使用docker构建hadoop集群
+# Hadoop 集群
 
+这个目录包含了用于构建和运行Hadoop集群的Docker配置文件。
 
-## 构建基础镜像
-```
+## 目录结构
+
+- `Dockerfile`: 用于构建Hadoop基础镜像
+- `docker-compose.yml`: 用于定义和运行多容器Hadoop应用
+- `entrypoint.sh`: 容器入口点脚本，根据命令参数执行不同操作
+- `etc/hadoop/`: Hadoop配置文件目录
+
+## 使用方法
+
+### 构建镜像
+
+```bash
 docker build -t hadoop-base:3.3.6 .
 ```
 
-## 构建hadoop集群镜像
+### 启动集群
 
-基础镜像：hadoop-base:3.3.6
-
-容器角色
-| 容器名称 | 角色 | 主要服务 | 端口映射 | 挂载目录 |
-|---------|------|---------|----------|----------|
-| master  | 主节点 | HDFS NameNode<br>YARN ResourceManager<br> | 9870 (HDFS UI)<br>8088 (YARN UI)<br>10002 (DataNode UI) |
-| worker1 | 工作节点 | HDFS DataNode<br>YARN NodeManager | - | /hadoop |
-| worker2 | 工作节点 | HDFS DataNode<br>YARN NodeManager| - | /hadoop |
-| worker3 | 工作节点 | HDFS DataNode<br>YARN NodeManager | - | /hadoop |
-| worker4 | 工作节点 | HDFS DataNode<br>YARN NodeManager | - | /hadoop<br> |
-
-使用docker-compose构建hadoop集群
-```
+```bash
 docker-compose up -d
 ```
 
+### 停止集群
 
-启动集群
-  使用docker-compose启动容器后，需要手动启动一下集群（这里不知道怎么才能让docker-compose up执行时，就启动hadoop服务，所以手动处理这一步）
-  进入master容器，执行以下命令
-  ```
-  docker exec -it master /opt/hadoop/sbin/start-all.sh
-  ```
+```bash
+docker-compose down
+```
+
+## 容器入口点
+
+`entrypoint.sh`脚本作为容器的入口点，可以根据传入的命令参数执行不同操作：
+
+- `hdfs`: 启动HDFS NameNode服务
+- `yarn`: 启动YARN ResourceManager服务
+- `start-all`: 启动所有Hadoop服务
+- `stop-all`: 停止所有Hadoop服务
+- `bash`: 启动bash shell
+
+在`docker-compose.yml`中，可以通过`command`指令指定要执行的命令，例如：
+
+```yaml
+command: ["hdfs"]
+```
+
+## 访问Web界面
+
+- HDFS NameNode: http://localhost:9870
+- YARN ResourceManager: http://localhost:8088
+- DataNode: http://localhost:10002
