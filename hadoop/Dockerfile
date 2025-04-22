@@ -27,10 +27,10 @@ RUN service ssh start
 RUN mkdir -p /hadoop/dfs/name /hadoop/dfs/data
 
 # 下载Hadoop安装包
-RUN wget https://archive.apache.org/dist/hadoop/core/hadoop-3.3.6/hadoop-3.3.6.tar.gz -P /tmp
+# RUN wget https://archive.apache.org/dist/hadoop/core/hadoop-3.3.6/hadoop-3.3.6.tar.gz -P /tmp
 
 # 拷贝提前下载好的安装包
-# COPY hadoop-3.3.6.tar.gz /tmp/
+COPY hadoop-3.3.6.tar.gz /tmp/
 
 # 解压安装Hadoop
 RUN tar -zxvf /tmp/hadoop-3.3.6.tar.gz -C /opt && \
@@ -38,7 +38,7 @@ RUN tar -zxvf /tmp/hadoop-3.3.6.tar.gz -C /opt && \
     rm -f /tmp/hadoop-3.3.6.tar.gz
 
 # 设置JAVA_HOME环境变量
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ENV PATH=$PATH:$JAVA_HOME/bin
 
 # 设置Hadoop环境变量
@@ -58,7 +58,7 @@ ENV YARN_RESOURCEMANAGER_USER="root"
 ENV YARN_NODEMANAGER_USER="root"
 
 # 配置Hadoop
-RUN echo "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh
+RUN echo "export JAVA_HOME=$JAVA_HOME" >> $HADOOP_HOME/etc/hadoop/hadoop-env.sh
 
 
 # 设置工作目录
@@ -68,10 +68,11 @@ WORKDIR $HADOOP_HOME
 # RUN hdfs namenode -format
 
 # 复制启动脚本并设置执行权限
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY entrypoint.sh /opt/entrypoint.sh
+RUN chmod +x /opt/entrypoint.sh
 
 # 设置容器入口点
-# ENTRYPOINT ["/entrypoint.sh"]
+# ENTRYPOINT ["/opt/entrypoint.sh"]
 
 CMD ["/usr/sbin/sshd", "-D"]
+# CMD ["bash"]

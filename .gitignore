@@ -1,5 +1,5 @@
 packages/
-
+.pkgs/
 *.tar.gz
 *.tgz
 *.tar.bz2

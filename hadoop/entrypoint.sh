@@ -26,7 +26,8 @@ case $COMMAND in
         echo "Starting all Hadoop services"
         # $HADOOP_HOME/sbin/start-dfs.sh
         # $HADOOP_HOME/sbin/start-yarn.sh
-        $HADOOP_HOME/sbin/start-all.sh
+        $HADOOP_HOME/sbin/start-all.sh 
+        tail -f $HADOOP_HOME/logs/hadoop-root-namenode-master.log  # 打印日志，保持容器不退出
         ;;
     "stop-all")
         echo "Stopping all Hadoop services"
@@ -39,8 +40,7 @@ case $COMMAND in
         /bin/bash
         ;;
     "")
-        echo "No command specified, starting bash shell"
-        /bin/bash
+        echo "No command specified"
         ;;
     *)
         echo "Unknown command: $COMMAND"
