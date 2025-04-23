@@ -110,41 +110,48 @@ chmod +x install.sh
 - worker4节点：HADOOP_HOME、PRESTO_HOME
 
 ### 服务启动流程
-1. 启动MySQL服务，等待其完全启动（约30秒）：
-   ```bash
-   docker-compose up -d mysql
-   ```
+准备
+以下是启动各服务的流程：
+启动所有集群节点
+```
+docker-compose up -d
+```
 
-2. 创建Hive用户：
+1. 启动hadoop服务
+```
+   # 初始化文件系统
+   docker exec -it master hdfs namenode -format
+   docker exec -it master /opt/hadoop/sbin/start-all.sh
+```
+
+2. 启动hive服务
+
+   2.1 创建Hive用户：
    ```bash
    docker exec -it mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS hive;"
-   ```
-
-3. 启动master节点服务：
-   ```bash
-   docker-compose up -d master
    ```
 
    > 注意：由于本样例要在一个容器中运行多个大数据的组件，因此需要将各个组件(hadoop,hive,hbase,spark,flink,presto等)拷贝到容器中，
    > 因此这个过程会比较耗时
    
-   3.1 初始化hive元数据:
+   2.2 初始化hive元数据:
    ```bash
-   docker exec -it master $HIVE_HOME/bin/schematool -dbType mysql -initSchema
+   docker exec -it master /opt/hive/bin/schematool -dbType mysql -initSchema
+   ```
+   
+   2.3 启动hive服务：
+   ```bash
+   # hive元数据服务
+   docker exec -it -d master /opt/hive/bin/hive --service metastore &
    ```
 
-
-4. 启动worker节点：
+3. 启动spark服务 
    ```bash
-   docker-compose up -d worker1 worker2 worker3 worker4
+   docker exec -it master /opt/spark/sbin/start-all.sh
    ```
-   各节点将自动连接到master节点并启动相应服务：
-   - DataNode注册到NameNode
-   - NodeManager连接到ResourceManager
-   - Spark Worker连接到Spark Master
-   - Flink TaskManager注册到JobManager
+   
 
-5. 验证服务状态：
+4. 验证服务状态：
    - 访问HDFS UI (http://localhost:9870)：
      * 检查NameNode是否处于active状态
      * 确认所有DataNode已注册并处于live状态
@@ -165,7 +172,7 @@ chmod +x install.sh
      * 检查TaskManager注册情况
      * 查看可用任务槽数量
 
-6. 测试集群功能：
+5. 测试集群功能：
    - 执行HDFS基本操作：
      ```bash
      docker exec -it master hdfs dfs -mkdir /test

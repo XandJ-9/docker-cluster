@@ -19,54 +19,95 @@ RUN ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa && \
 # 启动SSH服务
 RUN service ssh start
 
-# 复制大数据组件安装包
-# COPY packages /opt/packages
+# 设置JAVA_HOME环境变量
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+ENV PATH=$PATH:$JAVA_HOME/bin
+
+
 # 准备hadoop相关文件
-COPY ./.pkgs/hadoop-3.3.6.tar.gz /opt/service/hadoop-3.3.6.tar.gz
+COPY ./.pkgs/hadoop-3.3.6.tar.gz /opt/hadoop-3.3.6.tar.gz
 # 安装hadoop
-RUN tar -zxvf /opt/service/hadoop-3.3.6.tar.gz -C /opt/service && \
-    mv /opt/service/hadoop-3.3.6 /opt/service/hadoop && \
-    rm -rf /opt/service/hadoop-3.3.6.tar.gz && \
-    echo "export HADOOP_HOME=/opt/service/hadoop" >> /etc/profile && \
-    echo "export PATH=$HADOOP_HOME/bin:$PATH" >> /etc/profile
+RUN mkdir -p /opt/hadoop && \
+    tar -zxvf /opt/hadoop-3.3.6.tar.gz -C /opt/hadoop --strip-components=1 && \
+    rm -rf /opt/hadoop-3.3.6.tar.gz
+
+
+# 设置Hadoop环境变量
+ENV HADOOP_HOME=/opt/hadoop
+ENV PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+ENV HADOOP_MAPRED_HOME=$HADOOP_HOME
+ENV HADOOP_COMMON_HOME=$HADOOP_HOME
+ENV HADOOP_HDFS_HOME=$HADOOP_HOME
+ENV YARN_HOME=$HADOOP_HOME
+
+# 设置Hadoop用户
+ENV HDFS_NAMENODE_USER="root"
+ENV HDFS_DATANODE_USER="root"
+ENV HDFS_SECONDARYNAMENODE_USER="root"
+ENV YARN_RESOURCEMANAGER_USER="root"
+ENV YARN_NODEMANAGER_USER="root"
 
 # 准备hive相关文件
-COPY ./.pkgs/apache-hive-3.1.3-bin.tar.gz /opt/service/apache-hive-3.1.3-bin.tar.gz 
+COPY ./.pkgs/apache-hive-3.1.3-bin.tar.gz /opt/apache-hive-3.1.3-bin.tar.gz 
 # 安装hive
-RUN tar -zxvf /opt/service/apache-hive-3.1.3-bin.tar.gz -C /opt/service && \
-    mv /opt/service/apache-hive-3.1.3-bin /opt/service/hive && \
-    rm -rf /opt/service/apache-hive-3.1.3-bin.tar.gz && \
-    echo "export HIVE_HOME=/opt/service/hive" >> /etc/profile && \
-    echo "export PATH=$HIVE_HOME/bin:$PATH" >> /etc/profile
+RUN mkdir -p /opt/hive && \
+    tar -zxvf /opt/apache-hive-3.1.3-bin.tar.gz -C /opt/hive --strip-components=1 && \
+    rm -rf /opt/apache-hive-3.1.3-bin.tar.gz
+
+# 设置hive环境变量
+ENV HIVE_HOME=/opt/hive
+ENV PATH=$PATH:$HIVE_HOME/bin:$HIVE_HOME/sbin
+
+ENV MYSQL_ROOT_PASSWORD=root
+ENV MYSQL_DATABASE=hive
 
 # 准备hbase相关文件
-COPY ./.pkgs/hbase-2.5.5-bin.tar.gz /opt/service/hbase-2.5.5-bin.tar.gz
+COPY ./.pkgs/hbase-2.5.5-bin.tar.gz /opt/hbase-2.5.5-bin.tar.gz
 # 安装hbase
-RUN tar -zxvf /opt/service/hbase-2.5.5-bin.tar.gz -C /opt/service && \
-    mv /opt/service/hbase-2.5.5-bin /opt/service/hbase && \
-    rm -rf /opt/service/hbase-2.5.5-bin.tar.gz && \
-    echo "export HBASE_HOME=/opt/service/hbase" >> /etc/profile && \
-    echo "export PATH=$HBASE_HOME/bin:$PATH" >> /etc/profile
+RUN mkdir -p /opt/hbase && \
+    tar -zxvf /opt/hbase-2.5.5-bin.tar.gz -C /opt/hbase --strip-components=1 && \
+    rm -rf /opt/hbase-2.5.5-bin.tar.gz
+
+# 设置hbase环境变量
+ENV HBASE_HOME=/opt/hbase
+ENV PATH=$PATH:$HBASE_HOME/bin:$HBASE_HOME/sbin
 
 # 准备spark相关文件
-COPY ./.pkgs/spark-3.5.0-bin-hadoop3.tgz /opt/service/spark-3.5.0-bin-hadoop3.tgz
+COPY ./.pkgs/spark-3.5.0-bin-hadoop3.tgz /opt/spark-3.5.0-bin-hadoop3.tgz
 # 安装spark
-RUN tar -zxvf /opt/service/spark-3.5.0-bin-hadoop3.tgz -C /opt/service && \
-    mv /opt/service/spark-3.5.0-bin-hadoop3 /opt/service/spark && \
-    rm -rf /opt/service/spark-3.5.0-bin-hadoop3.tgz  && \
-    echo "export SPARK_HOME=/opt/service/spark" >> /etc/profile && \
-    echo "export PATH=$SPARK_HOME/bin:$PATH" >> /etc/profile
+RUN mkdir -p /opt/spark && \
+    tar -zxvf /opt/spark-3.5.0-bin-hadoop3.tgz -C /opt/spark --strip-components=1 && \
+    rm -rf /opt/spark-3.5.0-bin-hadoop3.tgz
 
-# 复制安装脚本
-# COPY install.sh /opt/install.sh
-# RUN chmod +x /opt/install.sh
+# 设置spark环境变量
+ENV SPARK_HOME=/opt/spark
+ENV PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+
+# 准备flink相关文件
+COPY ./.pkgs/flink-1.18.0-bin-scala_2.12.tgz /opt/flink-1.18.0-bin-scala_2.12.tgz
+# 安装flink
+RUN mkdir -p /opt/flink && \
+    tar -zxvf /opt/flink-1.18.0-bin-scala_2.12.tgz -C /opt/flink --strip-components=1 && \
+    rm -rf /opt/flink-1.18.0-bin-scala_2.12.tgz
+
+# 设置flink环境变量
+ENV FLINK_HOME=/opt/flink
+ENV PATH=$PATH:$FLINK_HOME/bin
+
+# 准备presto相关文件
+COPY ./.pkgs/presto-server-0.285.tar.gz /opt/presto-server-0.285.tar.gz
+# 安装presto
+RUN mkdir -p /opt/presto && \
+    tar -zxvf /opt/presto-server-0.285.tar.gz -C /opt/presto --strip-components=1 && \
+    rm -rf /opt/presto-server-0.285.tar.gz
+
+# 设置presto环境变量
+ENV PRESTO_HOME=/opt/presto
+ENV PATH=$PATH:$PRESTO_HOME/bin
 
 # 设置工作目录
 WORKDIR /opt
-
-# 设置环境变量
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-ENV PATH=$PATH:$JAVA_HOME/bin
 
 # 启动SSH服务并保持容器运行
 CMD ["/usr/sbin/sshd","-D"]

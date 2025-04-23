@@ -2,14 +2,13 @@ version: '3'
 
 services:
   master:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: cluster:2
     hostname: master
     container_name: master
     ports:
       - "9870:9870"   # HDFS Web UI
       - "8088:8088"   # YARN Web UI
+      - "10000:10000" 
       - "10002:10002" # DataNode UI
       - "8080:8080"   # Spark Web UI
       - "8081:8081"   # Flink Web UI
@@ -20,18 +19,12 @@ services:
       - FLINK_HOME=/opt/flink
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
-      - ./hadoop/etc:/opt/hadoop/etc
-      - ./spark/conf:/opt/spark/conf
-      - ./hive/conf:/opt/hive/conf
-      - ./flink:/opt/flink
     networks:
       - hadoop_net
-    # command: ["/opt/install.sh"]
+
 
   worker1:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: cluster:2
     hostname: worker1
     container_name: worker1
     environment:
@@ -39,18 +32,12 @@ services:
       - HIVE_HOME=/opt/hive
     volumes:
       - hadoop_datanode1:/hadoop/dfs/data
-      - ./hadoop/etc:/opt/hadoop/etc
-      - ./hive:/opt/hive
     networks:
       - hadoop_net
-    depends_on:
-      - master
-    # command: ["/opt/install.sh"]
+
 
   worker2:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: cluster:2
     hostname: worker2
     container_name: worker2
     environment:
@@ -58,18 +45,12 @@ services:
       - HBASE_HOME=/opt/hbase
     volumes:
       - hadoop_datanode2:/hadoop/dfs/data
-      - ./hadoop/etc:/opt/hadoop/etc
-      - ./hbase/conf:/opt/hbase/conf
     networks:
       - hadoop_net
-    depends_on:
-      - master
-    # command: ["/opt/install.sh"]
+
 
   worker3:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: cluster:2
     hostname: worker3
     container_name: worker3
     environment:
@@ -78,19 +59,12 @@ services:
       - FLINK_HOME=/opt/flink
     volumes:
       - hadoop_datanode3:/hadoop/dfs/data
-      - ./hadoop/etc:/opt/hadoop/etc
-      - ./spark/conf:/opt/spark/conf
-      - ./flink:/opt/flink
     networks:
       - hadoop_net
-    depends_on:
-      - master
-    # command: ["/opt/install.sh"]
+
 
   worker4:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: cluster:2
     hostname: worker4
     container_name: worker4
     environment:
@@ -98,18 +72,16 @@ services:
       - PRESTO_HOME=/opt/presto
     volumes:
       - hadoop_datanode4:/hadoop/dfs/data
-      - ./hadoop/etc:/opt/hadoop/etc
-      - ./presto:/opt/presto
     networks:
       - hadoop_net
-    depends_on:
-      - master
-    # command: ["/opt/install.sh"]
+
 
   mysql:
     image: mysql:8
     hostname: mysql
     container_name: mysql
+    ports:
+      - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=hive
