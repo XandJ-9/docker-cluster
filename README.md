@@ -31,22 +31,6 @@
 - 至少8GB内存
 - 至少20GB可用磁盘空间
 
-### 启动集群
-```bash
-docker-compose up -d
-```
-
-### 停止集群
-```bash
-docker-compose down
-```
-
-### Web UI访问
-- HDFS NameNode UI: http://localhost:9870
-- YARN ResourceManager UI: http://localhost:8088
-- DataNode UI: http://localhost:10002
-- Spark Master UI: http://localhost:8080
-- Flink JobManager UI: http://localhost:8081
 
 ## 组件版本
 
@@ -90,45 +74,37 @@ docker-compose down
    - 在flink/conf/目录下准备flink-conf.yaml配置文件
    - 在presto/etc/目录下准备config.properties配置文件
 
-3. 执行安装脚本：
-```bash
-chmod +x install.sh
-./install.sh
-```
+3. 构建基础镜像
+   ```bash
+   docker build -f Dockerfile -t cluster:1.0 . 
+   ```
+   这个镜像是准备基础的服务器环境，包含了hadoop、hive、hbase、spark、flink、presto等组件的安装， 这个镜像的构建比较耗时，因此单独构建好，后续有修改就不用重复构建。
+   在基础镜像之上在构建一层，这一步主要是因为需要更换配置文件，因此单独将上传配置文件的步骤放到一层
+   ```bash
+   docker build -f Dockerfile2 -t cluster:2.0 .
+   ```
 
-4. 验证安装：
-   - 检查各组件目录下是否已正确解压安装包
-   - 确认配置文件已正确放置在对应目录
-   - 检查目录权限是否正确设置
-
-### 环境变量配置
-各节点的环境变量已在docker-compose.yml中配置：
-- master节点：HADOOP_HOME、SPARK_HOME、HIVE_HOME、FLINK_HOME
-- worker1节点：HADOOP_HOME、HIVE_HOME
-- worker2节点：HADOOP_HOME、HBASE_HOME
-- worker3节点：HADOOP_HOME、SPARK_HOME、FLINK_HOME
-- worker4节点：HADOOP_HOME、PRESTO_HOME
 
 ### 服务启动流程
-准备
-以下是启动各服务的流程：
-启动所有集群节点
-```
-docker-compose up -d
-```
+基础准备，启动服务器集群容器
+   以下是启动各服务的流程：
+   启动所有集群节点
+   ```
+   docker-compose up -d
+   ```
 
 1. 启动hadoop服务
-```
+   ```
    # 初始化文件系统
-   docker exec -it master hdfs namenode -format
-   docker exec -it master /opt/hadoop/sbin/start-all.sh
-```
+   docker exec -i master hdfs namenode -format
+   docker exec -i master /opt/hadoop/sbin/start-all.sh
+   ```
 
 2. 启动hive服务
 
    2.1 创建Hive用户：
    ```bash
-   docker exec -it mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS hive;"
+   docker exec -i mysql mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS hive;"
    ```
 
    > 注意：由于本样例要在一个容器中运行多个大数据的组件，因此需要将各个组件(hadoop,hive,hbase,spark,flink,presto等)拷贝到容器中，
@@ -136,20 +112,23 @@ docker-compose up -d
    
    2.2 初始化hive元数据:
    ```bash
-   docker exec -it master /opt/hive/bin/schematool -dbType mysql -initSchema
+   docker exec -i master /opt/hive/bin/schematool -dbType mysql -initSchema
    ```
    
    2.3 启动hive服务：
    ```bash
    # hive元数据服务
-   docker exec -it -d master /opt/hive/bin/hive --service metastore &
+   docker exec -i -d master /opt/hive/bin/hive --service metastore
    ```
 
 3. 启动spark服务 
    ```bash
-   docker exec -it master /opt/spark/sbin/start-all.sh
+   docker exec -i master /opt/spark/sbin/start-all.sh
    ```
-   
+   测试spark：
+   ```bash
+   docker exec -i master spark-submit --master yarn --deploy-mode cluster --class org.apache.spark.examples.JavaSparkPi /opt/spark/examples/jars/spark-examples_2.12-3.5.0.jar
+   ```
 
 4. 验证服务状态：
    - 访问HDFS UI (http://localhost:9870)：
@@ -206,6 +185,9 @@ docker-compose up -d
    - yarn-site.xml配置是否正确
    - 各节点的hostname是否能够正确解析
 
-3. 如果Hive服务启动失败，检查：
+3. 命令行执行`docker exec -i master /opt/hadoop/sbin/start-all.sh`与`docker exec -it master /opt/hadoop/sbin/start-all.sh`执行脚本的区别，
+   如果添加了参数`-t`，那么脚本运行结束后，容器中的进程退出，导致服务启动失败
+
+4. 如果Hive服务启动失败，检查：
    - MySQL服务是否正常运行
    - hive-site.xml中的数据库连接配置是否正确

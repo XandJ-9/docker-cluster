@@ -1,5 +1,48 @@
 FROM cluster:1.0
 
+
+# 设置Hadoop环境变量
+ENV HADOOP_HOME=/opt/hadoop
+ENV PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+# ENV YARN_CONF_DIR=$HADOOP_HOME/etc/hadoop
+ENV HADOOP_MAPRED_HOME=$HADOOP_HOME
+ENV HADOOP_COMMON_HOME=$HADOOP_HOME
+ENV HADOOP_HDFS_HOME=$HADOOP_HOME
+ENV HADOOP_YARN_HOME=$HADOOP_HOME
+ENV YARN_HOME=$HADOOP_HOME
+
+
+# 设置Hadoop用户
+ENV HDFS_NAMENODE_USER="root"
+ENV HDFS_DATANODE_USER="root"
+ENV HDFS_SECONDARYNAMENODE_USER="root"
+ENV YARN_RESOURCEMANAGER_USER="root"
+ENV YARN_NODEMANAGER_USER="root"
+
+# 设置hive环境变量
+ENV HIVE_HOME=/opt/hive
+ENV PATH=$PATH:$HIVE_HOME/bin:$HIVE_HOME/sbin
+
+ENV MYSQL_ROOT_PASSWORD=root
+ENV MYSQL_DATABASE=hive
+
+# 设置hbase环境变量
+ENV HBASE_HOME=/opt/hbase
+ENV PATH=$PATH:$HBASE_HOME/bin:$HBASE_HOME/sbin
+
+# 设置spark环境变量
+ENV SPARK_HOME=/opt/spark
+ENV PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+
+# 设置flink环境变量
+ENV FLINK_HOME=/opt/flink
+ENV PATH=$PATH:$FLINK_HOME/bin
+
+# 设置presto环境变量
+ENV PRESTO_HOME=/opt/presto
+ENV PATH=$PATH:$PRESTO_HOME/bin
+
 COPY ./hadoop/etc/hadoop/ /opt/hadoop/etc/hadoop/
 RUN echo "export JAVA_HOME=$JAVA_HOME" >> /opt/hadoop/etc/hadoop/hadoop-env.sh
 COPY ./hbase/conf/ /opt/hbase/conf/
@@ -8,3 +51,5 @@ COPY ./hive/mysql-connector-j-8.2.0.jar /opt/hive/lib/
 COPY ./spark/conf/ /opt/spark/conf/
 COPY ./flink/conf/ /opt/flink/conf/
 COPY ./presto/etc/ /opt/presto/etc/
+
+

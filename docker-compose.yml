@@ -2,7 +2,7 @@ version: '3'
 
 services:
   master:
-    image: cluster:2
+    image: cluster:2.0
     hostname: master
     container_name: master
     ports:
@@ -12,24 +12,21 @@ services:
       - "10002:10002" # DataNode UI
       - "8080:8080"   # Spark Web UI
       - "8081:8081"   # Flink Web UI
-    environment:
-      - HADOOP_HOME=/opt/hadoop
-      - SPARK_HOME=/opt/spark
-      - HIVE_HOME=/opt/hive
-      - FLINK_HOME=/opt/flink
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
     networks:
       - hadoop_net
+    depends_on:
+      - worker1
+      - worker2
+      - worker3
+      - worker4
 
 
   worker1:
-    image: cluster:2
+    image: cluster:2.0
     hostname: worker1
     container_name: worker1
-    environment:
-      - HADOOP_HOME=/opt/hadoop
-      - HIVE_HOME=/opt/hive
     volumes:
       - hadoop_datanode1:/hadoop/dfs/data
     networks:
@@ -37,12 +34,9 @@ services:
 
 
   worker2:
-    image: cluster:2
+    image: cluster:2.0
     hostname: worker2
     container_name: worker2
-    environment:
-      - HADOOP_HOME=/opt/hadoop
-      - HBASE_HOME=/opt/hbase
     volumes:
       - hadoop_datanode2:/hadoop/dfs/data
     networks:
@@ -50,13 +44,9 @@ services:
 
 
   worker3:
-    image: cluster:2
+    image: cluster:2.0
     hostname: worker3
     container_name: worker3
-    environment:
-      - HADOOP_HOME=/opt/hadoop
-      - SPARK_HOME=/opt/spark
-      - FLINK_HOME=/opt/flink
     volumes:
       - hadoop_datanode3:/hadoop/dfs/data
     networks:
@@ -64,12 +54,9 @@ services:
 
 
   worker4:
-    image: cluster:2
+    image: cluster:2.0
     hostname: worker4
     container_name: worker4
-    environment:
-      - HADOOP_HOME=/opt/hadoop
-      - PRESTO_HOME=/opt/presto
     volumes:
       - hadoop_datanode4:/hadoop/dfs/data
     networks:
