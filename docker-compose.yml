@@ -10,6 +10,9 @@ services:
       - "8088:8088"   # YARN Web UI
       - "10000:10000" 
       - "10002:10002" # DataNode UI
+      - "19888:19888" # JobHistoryServer UI
+      - "19890:19890" 
+      - "18080:18080" # spark history
       - "8080:8080"   # Spark Web UI
       - "8081:8081"   # Flink Web UI
     volumes:

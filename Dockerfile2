@@ -51,5 +51,6 @@ COPY ./hive/mysql-connector-j-8.2.0.jar /opt/hive/lib/
 COPY ./spark/conf/ /opt/spark/conf/
 COPY ./flink/conf/ /opt/flink/conf/
 COPY ./presto/etc/ /opt/presto/etc/
+COPY ./start.sh /opt/start.sh
 
 

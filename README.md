@@ -93,12 +93,15 @@
    docker-compose up -d
    ```
 
+一键启动： docker exec -i master /opt/start.sh
+
 1. 启动hadoop服务
    ```
    # 初始化文件系统
    docker exec -i master hdfs namenode -format
    docker exec -i master /opt/hadoop/sbin/start-all.sh
    ```
+   docker exec -i master /opt/hadoop/bin/mapred --daemon start historyserver
 
 2. 启动hive服务
 
@@ -122,6 +125,10 @@
    ```
 
 3. 启动spark服务 
+   由于在配置spark-default.conf中配置了`hdfs://master:9000/spark-logs`路径，因此需要先创建这个目录
+   ```
+   docker exec -i master hdfs dfs -mkdir /spark-logs
+   ```
    ```bash
    docker exec -i master /opt/spark/sbin/start-all.sh
    ```
