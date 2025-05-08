@@ -93,7 +93,7 @@
    docker-compose up -d
    ```
 
-一键启动： docker exec -i master /opt/start.sh
+一键启动： docker exec -i -d master /opt/start.sh
 
 1. 启动hadoop服务
    ```
@@ -134,7 +134,14 @@
    ```
    测试spark：
    ```bash
+   # 提交到yarn集群上执行， 在yarn上查看任务执行情况
    docker exec -i master spark-submit --master yarn --deploy-mode cluster --class org.apache.spark.examples.JavaSparkPi /opt/spark/examples/jars/spark-examples_2.12-3.5.0.jar
+   # 提交到spark集群上执行，在
+   docker exec -i master spark-submit --master spark://master:7077 --deploy-mode cluster --class org.apache.spark.examples.JavaSparkPi /opt/spark/examples/jars/spark-examples_2.12-3.5.0.jar
+   ```
+   测试spark-sql：
+   ```bash
+   docker exec -i master spark-sql 
    ```
 
 4. 验证服务状态：
@@ -198,3 +205,5 @@
 4. 如果Hive服务启动失败，检查：
    - MySQL服务是否正常运行
    - hive-site.xml中的数据库连接配置是否正确
+
+5. 建议以挂载hadoop相关的目录，这样集群除了首次启动时需要初始化namenode,后续就不用重新初始化了。
